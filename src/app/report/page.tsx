@@ -37,8 +37,17 @@ const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
 });
 
 import { CATEGORY_EMOJIS } from "@/lib/categories";
+import {
+  useLanguage,
+  getCategoryTranslation,
+  getSeverityTranslation,
+  getPriorityBandTranslation,
+} from "@/i18n/LanguageContext";
+import VoiceRecorder from "@/components/VoiceRecorder";
+import TextToSpeechButton from "@/components/TextToSpeechButton";
 
 export default function ReportPage() {
+  const { locale, t } = useLanguage();
   // Authentication & session state
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -462,7 +471,7 @@ export default function ReportPage() {
               ✓
             </span>
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-              {isMerged ? "Report Merged!" : "Report Submitted!"}
+              {isMerged ? t("report.duplicatesFoundTitle", "Report Merged!") : t("report.successTitle", "Report Submitted!")}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
               Assigned to {submittedResult.ward_name}
@@ -527,7 +536,7 @@ export default function ReportPage() {
             className={`rounded-2xl border p-6 text-center shadow-xs transition-all ${scoreCardBorder}`}
           >
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Automated Priority Score
+              {t("report.priorityScoreLabel", "Automated Priority Score")}
             </span>
 
             {/* Score Before and After on Merge */}
@@ -647,20 +656,20 @@ export default function ReportPage() {
             href={`/issue/${submittedResult.issue_id}`}
             className="w-full flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all px-6 py-4 text-white font-semibold text-base shadow-sm shadow-blue-500/20 min-h-[48px]"
           >
-            Open this issue
+            {t("report.viewDetails", "Open this issue")}
           </Link>
           <Link
             href="/tracker"
             className="w-full flex items-center justify-center rounded-xl bg-white hover:bg-slate-100 active:scale-[0.98] transition-all border border-slate-300 px-6 py-4 text-slate-800 font-semibold text-base shadow-xs min-h-[48px]"
           >
-            View on public tracker
+            {t("report.viewInTracker", "View on public tracker")}
           </Link>
           <button
             type="button"
             onClick={handleResetForm}
             className="w-full flex items-center justify-center text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors py-2 min-h-[40px]"
           >
-            Report another issue
+            {t("report.reportAnother", "Report another issue")}
           </button>
         </div>
       </main>
@@ -799,7 +808,7 @@ export default function ReportPage() {
           {/* STEP 2: Category Selector */}
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              2. Category <span className="text-red-500">*</span>
+              {t("report.stepCategory", "2. Select Category")} <span className="text-red-500">*</span>
             </label>
 
             {categoriesLoading ? (
@@ -825,7 +834,7 @@ export default function ReportPage() {
                       }`}
                     >
                       <span className="text-lg shrink-0">{emoji}</span>
-                      <span className="truncate">{cat.label}</span>
+                      <span className="truncate">{getCategoryTranslation(cat.key, locale, cat.label)}</span>
                     </button>
                   );
                 })}
@@ -836,13 +845,13 @@ export default function ReportPage() {
           {/* STEP 3: Severity Level */}
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              3. Severity Level
+              {t("report.stepSeverity", "3. Severity Level")}
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { key: "minor", label: "Minor", desc: "Low hazard" },
-                { key: "moderate", label: "Moderate", desc: "Standard issue" },
-                { key: "dangerous", label: "Dangerous", desc: "Immediate risk" },
+                { key: "minor", label: getSeverityTranslation("minor", locale), desc: t("severities.minorDesc", "Low hazard") },
+                { key: "moderate", label: getSeverityTranslation("moderate", locale), desc: t("severities.moderateDesc", "Standard issue") },
+                { key: "dangerous", label: getSeverityTranslation("dangerous", locale), desc: t("severities.dangerousDesc", "Immediate risk") },
               ].map((lvl) => {
                 const isSelected = selectedSeverity === lvl.key;
                 return (
@@ -874,7 +883,7 @@ export default function ReportPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                4. Pin Location <span className="text-red-500">*</span>
+                {t("report.stepLocation", "4. Pin Location")} <span className="text-red-500">*</span>
               </label>
               <button
                 type="button"
@@ -882,7 +891,7 @@ export default function ReportPage() {
                 className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
                 <span>🎯</span>
-                <span>Current Location</span>
+                <span>{t("report.gpsPrompt", "Current Location")}</span>
               </button>
             </div>
 
@@ -898,7 +907,7 @@ export default function ReportPage() {
             />
 
             <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-1">
-              <span>Drag the pin to adjust exact location</span>
+              <span>{t("report.dragPinHelp", "Drag the pin to adjust exact location")}</span>
               <span>
                 {pinLat.toFixed(4)}, {pinLng.toFixed(4)}
               </span>
@@ -908,13 +917,22 @@ export default function ReportPage() {
           {/* STEP 5: Description */}
           <div className="space-y-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              5. Description (Optional)
+              <div className="flex items-center justify-between">
+                <span>{t("report.stepDescription", "5. Description (Optional)")}</span>
+                {description.trim() && (
+                  <TextToSpeechButton text={description} size="sm" variant="pill" />
+                )}
+              </div>
             </label>
+            <VoiceRecorder
+              onTranscript={(newText) => setDescription(newText)}
+              currentValue={description}
+            />
             <textarea
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Provide landmarks or helpful context (e.g. Near main market gate)..."
+              placeholder={t("report.descPlaceholder", "Provide landmarks or helpful context (e.g. Near main market gate)...")}
               className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all resize-none shadow-xs"
             />
           </div>
@@ -930,10 +948,10 @@ export default function ReportPage() {
               />
               <div className="text-xs">
                 <span className="font-semibold text-slate-800">
-                  Report anonymously
+                  {t("report.anonymousOption", "Report anonymously")}
                 </span>
                 <p className="text-[11px] text-slate-500">
-                  Hide your name from the public tracker view
+                  {t("report.anonymousDesc", "Hide your name from the public tracker view")}
                 </p>
               </div>
             </label>
@@ -948,10 +966,10 @@ export default function ReportPage() {
                 />
                 <div className="text-xs">
                   <span className="font-semibold text-slate-800">
-                    Reporting on behalf of another citizen
+                    {t("report.onBehalfOption", "Reporting on behalf of another citizen")}
                   </span>
                   <p className="text-[11px] text-slate-500">
-                    Flagged for municipal verification records
+                    {t("report.onBehalfDesc", "Flagged for municipal verification records")}
                   </p>
                 </div>
               </label>
@@ -980,7 +998,7 @@ export default function ReportPage() {
               ) : isSubmitting ? (
                 <div className="flex items-center gap-2">
                   <span className="animate-spin text-lg">⏳</span>
-                  <span>Submitting...</span>
+                  <span>{t("report.submitting", "Submitting...")}</span>
                 </div>
               ) : isCheckingPhoto ? (
                 <div className="flex items-center gap-2">
@@ -988,7 +1006,7 @@ export default function ReportPage() {
                   <span>Checking photo...</span>
                 </div>
               ) : (
-                <span>Submit Report</span>
+                <span>{t("report.submitBtn", "Submit Report")}</span>
               )}
             </button>
           </div>

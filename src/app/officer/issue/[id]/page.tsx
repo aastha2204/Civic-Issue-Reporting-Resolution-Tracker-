@@ -19,6 +19,14 @@ import {
 import { compressImage } from "@/lib/reports";
 import { getCategoryEmoji } from "@/lib/categories";
 import { supabase } from "@/lib/supabase/client";
+import {
+  useLanguage,
+  getCategoryTranslation,
+  getStatusTranslation,
+  getPriorityBandTranslation,
+} from "@/i18n/LanguageContext";
+import OfficerAiTranslationCard from "@/components/OfficerAiTranslationCard";
+import TextToSpeechButton from "@/components/TextToSpeechButton";
 
 const STATUS_CONFIG: Record<
   string,
@@ -63,6 +71,7 @@ const BAND_BADGES: Record<string, string> = {
 };
 
 export default function OfficerIssuePage() {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const params = useParams();
   const issueId = params?.id as string;
@@ -429,7 +438,7 @@ export default function OfficerIssuePage() {
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{emoji}</span>
                 <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight">
-                  {issue.category_label || issue.category}
+                  {getCategoryTranslation(issue.category, locale, issue.category_label || issue.category)}
                 </h1>
               </div>
 
@@ -440,13 +449,13 @@ export default function OfficerIssuePage() {
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${statusCfg.dotColor}`}
                   />
-                  {statusCfg.label}
+                  {getStatusTranslation(issue.status, locale)}
                 </span>
 
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black border ${bandBadge}`}
                 >
-                  {issue.priority_band} ({issue.priority_score}/100)
+                  {getPriorityBandTranslation(issue.priority_band, locale)} ({issue.priority_score}/100)
                 </span>
 
                 {issue.severity_level && (
@@ -556,16 +565,9 @@ export default function OfficerIssuePage() {
             </div>
           )}
 
-          {/* Description if present */}
+          {/* AI Translation and Citizen Description (Gemini AI with original preservation & TTS) */}
           {issue.description && (
-            <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-                Citizen Description
-              </span>
-              <p className="text-sm text-slate-800 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                {issue.description}
-              </p>
-            </div>
+            <OfficerAiTranslationCard originalText={issue.description} />
           )}
 
           {/* Reasons Text */}

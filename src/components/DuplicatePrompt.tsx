@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { DuplicateCandidate } from "@/lib/reports";
+import { useLanguage, getCategoryTranslation, getPriorityBandTranslation } from "@/i18n/LanguageContext";
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   pothole: "🕳️",
@@ -33,6 +34,7 @@ export default function DuplicatePrompt({
   isSubmitting,
   submittingCandidateId,
 }: DuplicatePromptProps) {
+  const { locale, t } = useLanguage();
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -41,7 +43,7 @@ export default function DuplicatePrompt({
           🔍
         </span>
         <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-          Is this the same issue?
+          {t("report.duplicatesFoundTitle", "Is this the same issue?")}
         </h2>
         <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
           We found {candidates.length === 1 ? "an open issue" : `${candidates.length} open issues`} of this type near your pin. Attaching your report helps resolve it faster.
@@ -91,7 +93,7 @@ export default function DuplicatePrompt({
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center justify-between gap-1">
                     <span className="text-sm font-bold text-slate-900 truncate">
-                      {emoji} {formattedCategory}
+                      {emoji} {getCategoryTranslation(candidate.category, locale, formattedCategory)}
                     </span>
                     <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 capitalize shrink-0">
                       {candidate.status}
@@ -144,7 +146,7 @@ export default function DuplicatePrompt({
                     <span>Merging report...</span>
                   </span>
                 ) : (
-                  <span>Yes, this is the same issue</span>
+                  <span>{t("report.upvoteCandidate", "Yes, this is the same issue")}</span>
                 )}
               </button>
             </div>
@@ -166,7 +168,7 @@ export default function DuplicatePrompt({
               <span>Submitting as new issue...</span>
             </span>
           ) : (
-            <span>No, this is a different issue</span>
+            <span>{t("report.submitAnyway", "No, this is a different issue")}</span>
           )}
         </button>
 

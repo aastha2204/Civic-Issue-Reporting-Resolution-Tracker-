@@ -15,6 +15,13 @@ import {
 import { Category, fetchCategories } from "@/lib/reports";
 import { getCategoryEmoji } from "@/lib/categories";
 import DemoBanner from "@/components/DemoBanner";
+import {
+  useLanguage,
+  getCategoryTranslation,
+  getStatusTranslation,
+  getPriorityBandTranslation,
+} from "@/i18n/LanguageContext";
+import TextToSpeechButton from "@/components/TextToSpeechButton";
 
 // Dynamically import Leaflet TrackerMap with SSR disabled
 const TrackerMap = dynamic(() => import("@/components/TrackerMap"), {
@@ -79,6 +86,7 @@ function formatTime(date: Date): string {
 }
 
 function TrackerContent() {
+  const { locale, t } = useLanguage();
   const searchParams = useSearchParams();
 
   // Core Data State
@@ -255,10 +263,10 @@ function TrackerContent() {
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
             <div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-                Public tracker
+                {t("tracker.pageTitle", "Public tracker")}
               </h1>
               <p className="text-sm sm:text-base text-slate-600 mt-1">
-                Every issue, ranked by a transparent score.
+                {t("tracker.subtitle", "Every issue, ranked by a transparent score.")}
               </p>
             </div>
 
@@ -335,7 +343,7 @@ function TrackerContent() {
                         isSelected ? "ring-2 ring-white" : ""
                       }`}
                     />
-                    <span>{statusItem.label}</span>
+                    <span>{getStatusTranslation(statusItem.key, locale)}</span>
                     <span
                       className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                         isSelected
@@ -583,12 +591,12 @@ function TrackerContent() {
                       <div className="space-y-1.5 flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-base font-bold text-slate-900 truncate">
-                            {categoryEmoji} {categoryLabel}
+                            {categoryEmoji} {getCategoryTranslation(issue.category, locale, categoryLabel)}
                           </span>
                           <span
                             className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold border ${bandBadgeClass}`}
                           >
-                            {issue.priority_score} pts • {issue.priority_band}
+                            {issue.priority_score} pts • {getPriorityBandTranslation(issue.priority_band, locale)}
                           </span>
                         </div>
 
@@ -599,7 +607,7 @@ function TrackerContent() {
                               statusCfg?.badgeStyle || "bg-slate-100 text-slate-700 border-slate-200"
                             }`}
                           >
-                            {statusCfg?.label || issue.status}
+                            {getStatusTranslation(issue.status, locale)}
                           </span>
                           <span>•</span>
                           <span className="truncate">{wardDisplay}</span>
@@ -627,12 +635,17 @@ function TrackerContent() {
                     </div>
 
                     {/* View issue link button */}
-                    <div className="sm:self-center shrink-0 pt-2 sm:pt-0">
+                    <div className="sm:self-center shrink-0 pt-2 sm:pt-0 flex items-center gap-2">
+                      <TextToSpeechButton
+                        text={`${getCategoryTranslation(issue.category, locale, categoryLabel)}. ${t("statuses." + issue.status, issue.status)}. ${issue.reasons_text || ""}`}
+                        size="sm"
+                        variant="icon"
+                      />
                       <Link
                         href={`/issue/${issue.id}`}
                         className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-blue-600 active:scale-95 text-white text-xs font-semibold transition-all shadow-xs min-h-[44px]"
                       >
-                        View issue →
+                        {t("tracker.viewDetails", "View issue →")}
                       </Link>
                     </div>
                   </article>

@@ -13,6 +13,13 @@ import {
 import { CATEGORY_EMOJIS } from "@/lib/categories";
 import FixConfirmation from "@/components/FixConfirmation";
 import SlaCard from "@/components/SlaCard";
+import {
+  useLanguage,
+  getCategoryTranslation,
+  getStatusTranslation,
+  getPriorityBandTranslation,
+} from "@/i18n/LanguageContext";
+import TextToSpeechButton from "@/components/TextToSpeechButton";
 
 const STATUS_CONFIG: Record<
   string,
@@ -51,6 +58,7 @@ const STATUS_CONFIG: Record<
 };
 
 export default function IssueDetailPage() {
+  const { locale, t } = useLanguage();
   const params = useParams();
   const issueId = params?.id as string;
 
@@ -220,7 +228,7 @@ export default function IssueDetailPage() {
           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${statusInfo.badgeStyle}`}
         >
           <span className={`h-1.5 w-1.5 rounded-full ${statusInfo.dotColor}`} />
-          <span>{statusInfo.label}</span>
+          <span>{getStatusTranslation(issue.status, locale)}</span>
         </span>
       </div>
 
@@ -229,7 +237,7 @@ export default function IssueDetailPage() {
         <div className="flex items-center gap-2">
           <span className="text-2xl">{emoji}</span>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            {formattedCategory}
+            {getCategoryTranslation(issue.category, locale, formattedCategory)}
           </h1>
         </div>
         <p className="text-xs text-slate-500 mt-1">
@@ -258,7 +266,11 @@ export default function IssueDetailPage() {
       {issue.description && (
         <div className="rounded-xl bg-white border border-slate-200 p-3.5 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-            Citizen Notes
+            {t("issue.citizenNotes", "Citizen Notes")}
+          </span>
+          <div className="pt-1">
+            <TextToSpeechButton text={issue.description} size="sm" variant="pill" />
+          </div>
           </span>
           <p className="text-xs text-slate-700 leading-relaxed">
             {issue.description}
@@ -271,7 +283,7 @@ export default function IssueDetailPage() {
         className={`rounded-2xl border p-5 text-center shadow-xs transition-all ${scoreCardBorder}`}
       >
         <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-          Automated Priority Score
+          {t("issue.automatedScore", "Automated Priority Score")}
         </span>
         <div className="flex items-center justify-center gap-2.5 my-2">
           <span className="text-5xl font-black text-slate-900 tracking-tighter">
@@ -282,13 +294,13 @@ export default function IssueDetailPage() {
         <div
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border uppercase tracking-wider mt-0.5 mb-2 ${bandBadgeStyle}`}
         >
-          {issue.priority_band} Priority
+          {getPriorityBandTranslation(issue.priority_band, locale)} {t("issue.priority", "Priority")}
         </div>
 
         {/* People Affected Count */}
         <div className="text-xs font-semibold text-slate-700 mt-1">
           👥 {issue.unique_reporters}{" "}
-          {issue.unique_reporters === 1 ? "person affected" : "people affected"}
+          {issue.unique_reporters === 1 ? t("issue.personAffected", "person affected") : t("issue.peopleAffected", "people affected")}
         </div>
       </div>
 
@@ -313,12 +325,12 @@ export default function IssueDetailPage() {
             ) : issue.i_support_this ? (
               <span className="flex items-center gap-1.5">
                 <span>✓</span>
-                <span>You&apos;re counted</span>
+                <span>{t("issue.alreadySupported", "You're counted")}</span>
               </span>
             ) : (
               <span className="flex items-center gap-1.5">
                 <span>🙋</span>
-                <span>I&apos;m affected too</span>
+                <span>{t("issue.iAmAffected", "I'm affected too")}</span>
               </span>
             )}
           </button>

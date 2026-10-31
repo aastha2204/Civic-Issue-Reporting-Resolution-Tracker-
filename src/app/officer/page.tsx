@@ -14,6 +14,13 @@ import { getCategoryEmoji } from "@/lib/categories";
 import SimulateRainToggle from "@/components/SimulateRainToggle";
 import { getSlaOverview, SlaOverviewItem, formatHours } from "@/lib/sla";
 import DemoBanner from "@/components/DemoBanner";
+import {
+  useLanguage,
+  getCategoryTranslation,
+  getStatusTranslation,
+  getPriorityBandTranslation,
+} from "@/i18n/LanguageContext";
+import TextToSpeechButton from "@/components/TextToSpeechButton";
 import { toCsv, downloadCsv, CsvColumn } from "@/lib/csv";
 
 const STATUS_CONFIG: Record<
@@ -59,6 +66,7 @@ const BAND_BADGES: Record<string, string> = {
 };
 
 export default function OfficerDashboardPage() {
+  const { locale, t } = useLanguage();
   const router = useRouter();
 
   // Authentication & Profile State
