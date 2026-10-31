@@ -11,6 +11,12 @@ export default function Home() {
             Civic Platform • India
           </span>
         </div>
+        <Link
+          href="/login"
+          className="text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+        >
+          Sign in →
+        </Link>
       </header>
 
       {/* Hero / Main Content */}
